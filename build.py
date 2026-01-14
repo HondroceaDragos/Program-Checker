@@ -26,7 +26,11 @@ class Setup:
     def run_script(cls, path_to_script: str = None):
         path = Path(__file__).resolve().parent / path_to_script.lstrip("/")
         try:
-            subprocess.run([sys.executable, str(path)], cwd=Path(__file__).resolve().parent, check=True)
+            subprocess.run(
+                [sys.executable, str(path)],
+                cwd=Path(__file__).resolve().parent,
+                check=True,
+            )
         except subprocess.CalledProcessError:
             sys.exit(1)
 

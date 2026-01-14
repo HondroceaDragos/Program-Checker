@@ -1,5 +1,6 @@
 import argparse
 
+
 class Interpreter:
     @classmethod
     def parse_args(cls):
@@ -12,6 +13,11 @@ class Interpreter:
             action="store_true",
             help="Clear terminal before running the checker",
         )
-        parser.add_argument("--suffixes", nargs=3, metavar=("IN", "OUT", "REF"), help="Specify file suffixes")
+        parser.add_argument(
+            "--suffixes",
+            nargs=3,
+            metavar=("IN", "OUT", "REF"),
+            help="Specify file suffixes",
+        )
 
         return parser.parse_args()

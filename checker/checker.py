@@ -1,3 +1,11 @@
+"""
+Program Checker
+
+This program is designed to grade a specific program based on a series
+of input tests. The checker creates the output folder, checks it's contents to
+the reference, grades and enforces time limits on the submitted code.
+"""
+
 import subprocess
 import sys
 
@@ -11,6 +19,11 @@ from utils import cli
 
 
 class Checker:
+    """
+    'Checker' class declaration and definition. Used for checking
+    program output, computing score and enforcing time limits.
+    """
+
     eps = 0.6
 
     input_suffix = ".txt"
@@ -19,7 +32,7 @@ class Checker:
 
     console = Console(soft_wrap=True)
 
-    TEST_SCORES = {"test_1": 32, "test_2": 33, "test_3": 35}
+    TEST_SCORES = {}
 
     TEST_THRESHOLDS = {
         "BAD": 0.34,
@@ -30,6 +43,22 @@ class Checker:
     def _call(
         cls, input_file: str = None, output_file: str = None, program_name: str = None
     ) -> tuple:
+        """
+        Execute one test from the input folder inside a Docker container.
+        The checking is done via redirecting input and output to the container.
+
+        Args:
+
+            input_file (str): Path to the input file.
+            output_file (str): Path to the desire output location.
+            program_name (str): The name of the executable.
+
+        Returns:
+
+            tuple:
+                -bool: Execution finished (either succesfully or interrupted by time limit).
+                -float: Elapsed execution time.
+        """
         try:
             output_dir_path = (
                 Path(output_file).parent
@@ -71,27 +100,74 @@ class Checker:
 
         except subprocess.TimeoutExpired:
             return (False, cls.eps)
-    
-    @classmethod
-    def get_active_tests(cls, input: str = None) -> list:
-        return [
-            f.stem for f in Path(input).glob(f"*{cls.input_suffix}")
-        ]
 
     @classmethod
-    def get_test_score(cls, test_name: int) -> int:
+    def get_active_tests(cls, input: str = None) -> list:
+        """
+        Get a list of tests, based on file suffix.
+
+        Args:
+            input (str): Where the files are located.
+
+        Returns:
+            list: List of test file stems.
+        """
+        return [f.stem for f in Path(input).glob(f"*{cls.input_suffix}")]
+
+    @classmethod
+    def get_test_score(cls, test_name: str = None) -> int:
+        """
+        Get the score of a specific test.
+
+        Args:
+            test_name (str): The name of the test.
+
+        Returns:
+            int: Score of the test (or 0, if not found).
+        """
         return cls.TEST_SCORES.get(test_name, 0)
 
     @classmethod
     def get_test_threshold(cls, tag: str = None) -> float:
+        """
+        Get the threshold for a specific grade.
+
+        Args:
+            tag (str): The name of the grade.
+
+        Returns:
+            float: Threshold for that grade.
+        """
         return cls.TEST_THRESHOLDS.get(tag, 0)
 
     @classmethod
     def check_file_contents(cls, input: str = None, output: str = None) -> bool:
+        """
+        Check if two files are identical, byte-wise.
+
+        Args:
+            input (str): Compared file.
+            output (str): File to be compared to.
+
+        Returns:
+            bool: True if contents are the same, False otherwise.
+        """
         return Path(input).read_bytes().strip() == Path(output).read_bytes().strip()
 
     @classmethod
     def run(cls, test_numb: int = None, program_name: str = None) -> tuple:
+        """
+        Run multiple tests and display the outcome.
+
+        Args:
+            test_numb (int): Check only a specific test.
+            program_name (str): Check the specified program.
+
+        Returns:
+            tuple:
+                -int: Total score obtained.
+                -int: Number of tests passed.
+        """
         run_score = 0
         run_tests_passed = 0
 
@@ -107,7 +183,9 @@ class Checker:
             possible_score = cls.get_test_score(test_name)
 
             (passed_time_check, elapsed_time) = cls._call(
-                str(test_file), f"./output/{test_name}_out{cls.output_suffix}", program_name
+                str(test_file),
+                f"./output/{test_name}_out{cls.output_suffix}",
+                program_name,
             )
             if passed_time_check and elapsed_time <= cls.eps:
                 output_file_path = (
@@ -135,6 +213,11 @@ class Checker:
 
     @classmethod
     def build_image(cls) -> None:
+        """
+        Build the docker image reuired by tests.
+
+        Exit the program if image building fails.
+        """
         try:
             subprocess.run(
                 [
@@ -151,6 +234,17 @@ class Checker:
 
     @classmethod
     def compute_score(cls, test_numb: int = None, program_name: str = None) -> dict:
+        """
+        Compute the final score, completion percentage and number
+        of tests passsed.
+
+        Args:
+            test_numb (int): If one test was checked, only use its score as a reference.
+            program_name (str): The name of the program being checked.
+
+        Returns:
+            dict: Summary of the stats and overall score.
+        """
         active_tests = sorted(cls.get_active_tests("./input"))
         if test_numb:
             active_test = active_tests[test_numb - 1]
@@ -175,17 +269,25 @@ class Checker:
             "max_score": max_score,
         }
 
+
 @guards.swift_exit(Checker.console)
 @guards.restore_cursor(Checker.console)
 def main() -> None:
-        h = cli.Handler(Checker)
-        h.handle_timeout_duration()
-        h.handle_file_suffixes()
+    """
+    Program entry point
 
-        Checker.build_image()
+    Interpret checker flags and run tests.
+    Display the final score to the user.
+    """
+    h = cli.Handler(Checker)
+    h.handle_timeout_duration()
+    h.handle_file_suffixes()
 
-        h.handle_clear_terminal()
-        h.handle_program_checking()
+    Checker.build_image()
+
+    h.handle_clear_terminal()
+    h.handle_program_checking()
+
 
 if __name__ == "__main__":
     main()

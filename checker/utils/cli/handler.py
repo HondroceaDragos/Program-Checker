@@ -4,6 +4,7 @@ from ..printer import Printer
 import os
 import sys
 
+
 class Handler:
     args = Interpreter.parse_args()
 
@@ -21,11 +22,17 @@ class Handler:
 
     def handle_file_suffixes(self) -> None:
         if self.args.suffixes:
-            self.checker.input_suffix, self.checker.output_suffix, self.checker.ref_suffix = self.args.suffixes
+            (
+                self.checker.input_suffix,
+                self.checker.output_suffix,
+                self.checker.ref_suffix,
+            ) = self.args.suffixes
 
     def handle_program_checking(self) -> None:
         if self.args.test is not None:
-            if self.args.test <= 0 or self.args.test > len(self.checker.get_active_tests("./input")):
+            if self.args.test <= 0 or self.args.test > len(
+                self.checker.get_active_tests("./input")
+            ):
                 self.checker.console.print(
                     "[bold red]ERROR:[/bold red] [white]Invalid test number[/white]"
                 )

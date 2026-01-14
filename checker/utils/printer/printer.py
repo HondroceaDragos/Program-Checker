@@ -2,6 +2,7 @@ from rich.align import Align
 from rich.panel import Panel
 from rich.console import Group
 
+
 class Printer:
     def __init__(self, checker):
         self.checker = checker
@@ -16,7 +17,7 @@ class Printer:
                     ),
                     border_style="bold yellow",
                     width=60,
-                    padding=(0,2)
+                    padding=(0, 2),
                 )
             )
         )
