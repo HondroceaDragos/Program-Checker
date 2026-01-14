@@ -196,13 +196,13 @@ class Checker:
                 if cls.check_file_contents(
                     output_file_path, f"./ref/{test_name}_ref{cls.ref_suffix}"
                 ):
-                    status = f"[bold green][PASSED - Elapsed time: {elapsed_time:.5f}]{" " * 11}({possible_score:2d}p / {possible_score:2d}p) [/bold green]"
+                    status = f'[bold green][PASSED - Elapsed time: {elapsed_time:.5f}]{" " * 11}({possible_score:2d}p / {possible_score:2d}p) [/bold green]'
                     run_score += possible_score
                     run_tests_passed += 1
                 else:
-                    status = f"[bold red][FAILED - Wrong result] {" " * 8}{" " * 11}( 0p / {possible_score:2d}p) [/bold red]"
+                    status = f'[bold red][FAILED - Wrong result] {" " * 8}{" " * 11}( 0p / {possible_score:2d}p) [/bold red]'
             else:
-                status = f"[bold red][FAILED - Time limit excedeed: {elapsed_time:.5f}]{" " * 4}( 0p / {possible_score:2d}p) [/bold red]"
+                status = f'[bold red][FAILED - Time limit excedeed: {elapsed_time:.5f}]{" " * 4}( 0p / {possible_score:2d}p) [/bold red]'
 
             pts_numb = int(cls.console.width / 5) - len(test_name)
             cls.console.print(
