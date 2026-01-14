@@ -6,7 +6,7 @@ import subprocess
 
 
 class ScriptResolver:
-    timeout = 5
+    timeout = 500
 
     def __init__(self, dir_path="/app"):
         self.script_path = self._get_script_path(dir_path)
