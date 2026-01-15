@@ -45,7 +45,10 @@ class Printer:
         tests_passed = stats["tests_passed"]
         final_score = stats["final_score"]
         max_score = stats["max_score"]
-        tests = len(self.checker.get_active_tests("./input"))
+        if test_numb:
+            tests = 1
+        else:
+            tests = len(self.checker.get_active_tests("./input"))
 
         self.checker.console.print()
         summary = Group(
